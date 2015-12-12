@@ -1,3 +1,5 @@
+#!/usr/bin/env carbon
+
 -- Lets just chat!
 event = require("libs.event")
 logger = require("libs.logger")
@@ -14,17 +16,35 @@ end))
 
 -- Chat logic
 srv.GET("/ws", mw.ws(function()
-	-- TODO: Replace
-	local clientid = context.ClientIP() -- Use simply the client IP + Port as the ID.
+	-- Small variables we use later.
+	local deflen = 10
+	local maxlen = 30
+	-- Require libraries we use.
 	event = require("libs.event")
+	rpc = require("libs.multirpc")
+	user = user or require("libs.usercheck")
+
+	local clientid = context.ClientIP() -- Use simply the client IP + Port as the ID.
 
 	-- TODO: Actual chan logic.
-	local name = query("name") or ("user"..clientid)
+	local name = query("name") or user.gen(deflen)
+
+	if #name > maxlen then -- Exceeds maximum name length
+		ws.send(ws.TextMessage, "Name exceeds max length.")
+		return
+	end
+
+	if not user.valid(name) then
+		ws.send(ws.TextMessage, "Name contains invalid characters.")
+		return
+	end
+
 	local chan = query("chan") or "lobby"
 
 	-- Fail if username is already existing.
 	local started = kvstore.get("started:"..chan)
 	if not started then
+		rpc.call("log.normal", "Chat", "Looks like "..chan.." is getting some activity!")
 		event.handle("chan:"..chan, function(action, name, clientid, msg)
 			usercount = usercount or 0
 			db = db or {}
@@ -49,8 +69,8 @@ srv.GET("/ws", mw.ws(function()
 				kvstore.set("users:"..channel, db)
 				pub("left", name)
 				if usercount == 0 then -- Teardown
-					print("Teardown")
-					kvstore.delete("users:"..channel)
+					kvstore.del("users:"..channel)
+					rpc.call("log.normal", "Chat", "Channel "..channel.." seems to have lost it's userbase... :(")
 					return false
 				end
 			else
@@ -64,7 +84,6 @@ srv.GET("/ws", mw.ws(function()
 
 	if (kvstore.get("users:"..chan) or {})[name] then
 		ws.send(ws.TextMessage, "User already existing.")
-		content("", 200)
 		return
 	end
 
@@ -72,20 +91,32 @@ srv.GET("/ws", mw.ws(function()
 	kvstore.set("client:"..clientid, ws.con)
 	event.fire("chan:"..chan, "join", name, clientid)
 
+	local matchfunc = function(cmd, args)
+		if cmd == "join" or cmd == "left" then
+			ws.send(ws.TextMessage, "error Disallowed command.")
+		else
+			event.fire("chan:"..chan, cmd, name, clientid, args)
+		end
+	end
+
 	-- Chat loop
 	while true do
 		local p, msg, err = ws.read()
 		if err then
 			break
 		end
+
 		if msg then
-			(msg.." "):gsub("^(.-) (.-)$", function(cmd, args)
-				if cmd ~= "join" and cmd ~= "left" then
-					event.fire("chan:"..chan, "msg", name, clientid, args)
-				else
-					ws.send(ws.TextMessage, "error Disallowed command.")
-				end
+			local matched = false
+			msg:gsub("^(%w-) (.-)$", function(cmd, args)
+				matched = true
+				matchfunc(cmd, args)
 			end)
+			if not matched then
+				msg:gsub("^(%w-)$", function(cmd)
+					matchfunc(cmd)
+				end)
+			end
 		end
 		os.sleep(0.2)
 	end

@@ -25,13 +25,13 @@ The command, like `msg` is the type of action to apply given arguments.
 
 The arguments are self explanatory, just simple text.
 
-## Sending part
+## Client-side TX
 
 ### `msg Hello world!`
 
 Simple message command, sends out "Hello world!" in the current channel.
 
-## Receiving part
+## Client-side RX
 
 ### `msg bob hi`
 
@@ -44,4 +44,3 @@ This means `bob` joined.
 ### `left bob`
 
 `bob` left the channel.
-
