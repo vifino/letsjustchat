@@ -19,6 +19,7 @@ end))
 srv.GET("/ws", mw.ws(function()
 	-- Small variables we use later.
 	local deflen = 10
+	local minlen = 1
 	local maxlen = 30
 
 	local maxmsglen = 1024
@@ -37,9 +38,12 @@ srv.GET("/ws", mw.ws(function()
 	local clientid = context.ClientIP() -- Use simply the client IP + Port as the ID.
 
 	-- TODO: Actual chan logic.
-	local name = query("name") or server.gen_str(deflen)
+	local name = query("name")
 
-	if #name > maxlen then -- Exceeds maximum name length
+	if name == nil or name == "" then
+		ws.send(ws.TextMessage, "error * Please choose a name by connecting to the WebSocket with the query argument name set to your preferred name.")
+		return
+	elseif #name > maxlen then -- Exceeds maximum name length
 		ws.send(ws.TextMessage, "error * Name exceeds max length.")
 		return
 	end
