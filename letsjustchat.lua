@@ -89,10 +89,12 @@ srv.GET("/ws", mw.ws(function()
 					usercount = usercount + 1
 					kvstore.set("users:"..channel, db)
 					pub("join", name)
+					event.fire("user:join", channel, name, db)
 				elseif action == "left" then
 					db[name] = nil
 					usercount = usercount - 1
 					kvstore.set("users:"..channel, db)
+					event.fire("user:left", channel, name, db)
 					pub("left", name)
 					if usercount == 0 then -- Teardown
 						kvstore.del("users:"..channel)
