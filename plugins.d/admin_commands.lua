@@ -53,7 +53,7 @@ rpc.command("attention:lua", function(chan, name, arg)
 		if err then
 			f, err = loadstring(arg)
 			if err then
-				rpc.call("send", chan, name, "msg *lua* Error: "..err)
+				rpc.call("send", chan, name, "error *lua* Error: "..err)
 				return
 			end
 		end
@@ -61,7 +61,7 @@ rpc.command("attention:lua", function(chan, name, arg)
 		if suc then
 			rpc.call("send", chan, name, "msg *lua* -> "..tostring(res))
 		else
-			rpc.call("send", chan, name, "msg *lua* Error: "..res)
+			rpc.call("send", chan, name, "error *lua* Error: "..res)
 		end
 	else
 		logger.log("bcast", logger.important, "Unauthenticated user tried to use lua!")
@@ -82,15 +82,17 @@ rpc.command("attention:glua", function(chan, name, arg)
 		if err then
 			f, err = loadstring(arg)
 			if err then
-				rpc.call("broadcast", chan, name, "msg *lua* Error: "..err)
+				rpc.call("broadcast", chan, name, "error *lua* Error: "..err)
 				return
 			end
 		end
 		local suc, res = pcall(f)
 		if suc then
-			rpc.call("broadcast", chan, "msg *lua* -> "..tostring(res))
+			if res then
+				rpc.call("broadcast", chan, "msg *lua* -> "..tostring(res))
+			end
 		else
-			rpc.call("broadcast", chan, "msg *lua* Error: "..res)
+			rpc.call("broadcast", chan, "error *lua* Error: "..res)
 		end
 	else
 		logger.log("bcast", logger.important, "Unauthenticated user tried to use glua!")

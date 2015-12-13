@@ -157,9 +157,9 @@ srv.GET("/ws", mw.ws(function()
 				ws.send(ws.TextMessage, "error * Command exceeded maximum length of "..tostring(maxmsglen)..".")
 			end
 		end
-		os.sleep(0.2)
+		os.sleep(0.5)
 	end
 
 	-- Finalize
-	event.fire("chan:"..chan, "client", "left", chan, clientid)
+	event.fire("chan:"..chan, "client", "left", name, chan, clientid)
 end))
