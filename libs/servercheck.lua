@@ -7,12 +7,19 @@ local function strrandom(length)
 end
 
 return {
-	gen = function(len)
+	gen_str = function(len)
 		-- TODO: Make better generator.
 		return strrandom(length)
 	end,
-	valid = function(str)
+	user_valid = function(str)
 		-- TODO: Allow some unicode or something.
-		return not str:match("%W")
+
+		-- Check based on pattern.
+		local is_invalid = str:match("%W")
+
+		-- Check if it is the restricted *, just in case.
+		is_invalid = is_invalid or str == "*"
+
+		return not is_invalid
 	end
 }
