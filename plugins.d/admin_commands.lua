@@ -15,7 +15,7 @@ rpc.command("attention:bcast", function(chan, name, arg)
 		end)
 		--rpc.call("broadcast", chan, "msg "..msg_arg)
 	else
-		logger.log("bcast", logger.important, "Unauthenticated user tried to use bcast!")
+		logger.log("Chat", logger.important, "Unauthenticated user "..name.." tried to use bcast!")
 		rpc.call("send", chan, name, "error * You are not authorized to use the local broadcast command.")
 	end
 end)
@@ -35,7 +35,7 @@ rpc.command("attention:send", function(chan, name, arg)
 		end)
 		--rpc.call("broadcast", chan, "msg "..msg_arg)
 	else
-		logger.log("bcast", logger.important, "Unauthenticated user tried to use send!")
+		logger.log("Chat", logger.important, "Unauthenticated user "..name.." tried to use send!")
 		rpc.call("send", chan, name, "error * You are not authorized to use the send command.")
 	end
 end)
@@ -64,7 +64,7 @@ rpc.command("attention:lua", function(chan, name, arg)
 			rpc.call("send", chan, name, "error *lua* Error: "..res)
 		end
 	else
-		logger.log("bcast", logger.important, "Unauthenticated user tried to use lua!")
+		logger.log("Chat", logger.important, "Unauthenticated user "..name.." tried to use lua!")
 		rpc.call("send", chan, name, "error * You are not authorized to use the lua command.")
 	end
 end)
@@ -95,7 +95,7 @@ rpc.command("attention:glua", function(chan, name, arg)
 			rpc.call("broadcast", chan, "error *lua* Error: "..res)
 		end
 	else
-		logger.log("bcast", logger.important, "Unauthenticated user tried to use glua!")
+		logger.log("Chat", logger.important, "Unauthenticated user "..name.." tried to use glua!")
 		rpc.call("send", chan, name, "error * You are not authorized to use the glua command.")
 	end
 end)
