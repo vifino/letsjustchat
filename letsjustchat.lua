@@ -69,7 +69,11 @@ srv.GET("/ws", mw.ws(function()
 				for user, userid in pairs(db) do
 					if user ~= name then
 						local wsok = kvstore.get("client:"..userid)
-						wsok.WriteMessage(1, convert.stringtocharslice(a..(nme and (" " .. nme) or "")..(m and (" " .. m) or ""))) -- Dark magic
+						if wsok then
+							wsok.WriteMessage(1, convert.stringtocharslice(a..(nme and (" " .. nme) or "")..(m and (" " .. m) or ""))) -- Dark magic
+						else
+							event.fire("client:"..channel, "client", "left", name, clientid)
+						end
 					end
 				end
 			end
@@ -84,7 +88,11 @@ srv.GET("/ws", mw.ws(function()
 					local cid = db[action]
 					if cid then
 						local wsok = kvstore.get("client:"..cid)
-						wsok.WriteMessage(1, convert.stringtocharslice(name..(clientid and (" " .. clientid) or "")..(msg and (" " .. msg) or ""))) -- Dark magic
+						if wsok then
+							wsok.WriteMessage(1, convert.stringtocharslice(name..(clientid and (" " .. clientid) or "")..(msg and (" " .. msg) or ""))) -- Dark magic
+						else
+							event.fire("client:"..channel, "client", "left", name, clientid)
+						end
 					end
 				end
 			else
@@ -166,5 +174,5 @@ srv.GET("/ws", mw.ws(function()
 	end
 
 	-- Finalize
-	event.fire("chan:"..chan, "client", "left", name, chan, clientid)
+	event.fire("chan:"..chan, "client", "left", name, clientid)
 end))
