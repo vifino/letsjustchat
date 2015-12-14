@@ -102,6 +102,7 @@ srv.GET("/ws", mw.ws(function()
 					pub("left", name)
 					if usercount == 0 then -- Teardown
 						kvstore.del("users:"..channel)
+						kvstore.del("started:"..channel)
 						rpc.call("log.normal", "Chat", "Channel "..channel.." seems to have lost it's userbase... :(")
 						return false
 					end
