@@ -143,7 +143,7 @@
 					return "! " + inp.substr(1);
 				} else {
 					var str = inp;
-					if (h == "/") {
+					if (c == '/' && h == "/") {
 						str = inp.substr(1);
 					}
 					addLine("&lt;<b>" + escapeHTML(name) + "</b>&gt; " + escapeHTML(str) + "<br/>");
