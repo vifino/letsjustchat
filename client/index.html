@@ -177,7 +177,7 @@
 						if (msg_args.replace(/ /g, "") == "")
 							break;
 						var text = escapeHTML("Information: " + msg_args);
-						if (text == "Ghosted connection with same name as current one.") name = "";
+						if (text.indexOf("Ghosted connection with same name as current one.")>=0) name = "";
 						addLine('<font color="blue">' + text + "</font><br/>");
 						break;
 					case "warn":
