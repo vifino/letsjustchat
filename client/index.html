@@ -176,9 +176,7 @@
 					case "info":
 						if (msg_args.replace(/ /g, "") == "")
 							break;
-						var text = escapeHTML("Information: " + msg_args);
-						if (text.indexOf("Ghosted connection with same name as current one.")>=0) name = "";
-						addLine('<font color="blue">' + text + "</font><br/>");
+						addLine('<font color="blue">' + escapeHTML("Information: " + msg_args) + "</font><br/>");
 						break;
 					case "warn":
 						if (msg_args.replace(/ /g, "") == "")
@@ -188,7 +186,9 @@
 					case "error":
 						if (msg_args.replace(/ /g, "") == "")
 							break;
-						addLine('<font color="red">' + escapeHTML("Error: " + msg_args) + "</font><br/>");
+						var text = escapeHTML("Error: " + msg_args);
+						if (text.indexOf("You got ghosted!")>=0) name = "";
+						addLine('<font color="red">' + text + "</font><br/>");
 						break;
 					case "join":
 						addLine("<b>" + escapeHTML(msg_nick) + "</b> joined.<br/>");
