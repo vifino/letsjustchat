@@ -4,7 +4,8 @@
 rpc.command("attention:bcast", function(chan, name, arg)
 	local clientid = (kvstore.get("users:"..chan) or {})[name]
 	-- TODO: Add whitelist settings thing.
-	if clientid:gsub(":(%d+)", "") == "127.0.0.1" then
+	local ip = clientid:gsub(":(%d+)", "")
+	if admins[ip] then
 		arg:gsub("^(.-) (.+)$", function(target_chan, bcast_args)
 			local target_chan = target_chan
 			if target_chan == "-" then
@@ -18,13 +19,16 @@ rpc.command("attention:bcast", function(chan, name, arg)
 		logger.log("Chat", logger.important, "Unauthenticated user "..name.." tried to use bcast!")
 		rpc.call("send", chan, name, "error * You are not authorized to use the local broadcast command.")
 	end
-end)
+end, {
+	admins = settings.admins,
+})
 
 -- Pretty much bcast with just one person receiving it.
 rpc.command("attention:send", function(chan, name, arg)
 	local clientid = (kvstore.get("users:"..chan) or {})[name]
 	-- TODO: Add whitelist settings thing.
-	if clientid:gsub(":(%d+)", "") == "127.0.0.1" then
+	local ip = clientid:gsub(":(%d+)", "")
+	if admins[ip] then
 		arg:gsub("^(.-) (.-) (.+)$", function(target_chan, user, send_args)
 			local target_chan = target_chan
 			if target_chan == "-" then
@@ -38,12 +42,15 @@ rpc.command("attention:send", function(chan, name, arg)
 		logger.log("Chat", logger.important, "Unauthenticated user "..name.." tried to use send!")
 		rpc.call("send", chan, name, "error * You are not authorized to use the send command.")
 	end
-end)
+end, {
+	admins = settings.admins,
+})
 
 -- Lua eval.
 rpc.command("attention:lua", function(chan, name, arg)
 	local clientid = (kvstore.get("users:"..chan) or {})[name]
-	if clientid:gsub(":(%d+)", "") == "127.0.0.1" then
+	local ip = clientid:gsub(":(%d+)", "")
+	if admins[ip] then
 		function print(...)
 			for k, v in pairs({...}) do
 				rpc.call("send", chan, name, "msg *lua* "..tostring(v))
@@ -67,12 +74,15 @@ rpc.command("attention:lua", function(chan, name, arg)
 		logger.log("Chat", logger.important, "Unauthenticated user "..name.." tried to use lua!")
 		rpc.call("send", chan, name, "error * You are not authorized to use the lua command.")
 	end
-end)
+end, {
+	admins = settings.admins,
+})
 
 -- Same as above, but print() and return outputs to the channel instead.
 rpc.command("attention:glua", function(chan, name, arg)
 	local clientid = (kvstore.get("users:"..chan) or {})[name]
-	if clientid:gsub(":(%d+)", "") == "127.0.0.1" then
+	local ip = clientid:gsub(":(%d+)", "")
+	if admins[ip] then
 		function print(...)
 			for k, v in pairs({...}) do
 				rpc.call("broadcast", chan, "msg *lua* "..tostring(v))
@@ -98,4 +108,6 @@ rpc.command("attention:glua", function(chan, name, arg)
 		logger.log("Chat", logger.important, "Unauthenticated user "..name.." tried to use glua!")
 		rpc.call("send", chan, name, "error * You are not authorized to use the glua command.")
 	end
-end)
+end, {
+	admins = settings.admins,
+})

@@ -5,6 +5,9 @@ event = require("libs.event")
 logger = require("libs.logger")
 loader = require("libs.loader")
 
+-- Settings
+settings = require("settings")
+
 logger.log("Main", logger.normal, "Loading Init files...")
 local loaded, loadtime = loader.load("init.d/*")
 logger.log("Main", logger.normal, "Loaded "..tostring(loaded).." Init Files. Took "..tostring(loadtime).."s.")
