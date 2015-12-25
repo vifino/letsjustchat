@@ -7,7 +7,7 @@ event.handle("user:join", function(chan, name, db)
 		userstr = userstr..user.." "
 	end
 
-	rpc.call("send", chan, name, "msg * Currently connected users: "..userstr)
+	rpc.call("send", chan, name, "info *list* Currently connected users: "..userstr)
 end)
 rpc.command("attention:list", function(chan, name, args, db)
 	local userstr = ""
@@ -15,5 +15,5 @@ rpc.command("attention:list", function(chan, name, args, db)
 		userstr = userstr..user.." "
 	end
 
-	rpc.call("send", chan, name, "msg * Currently connected users: "..userstr)
+	rpc.call("send", chan, name, "info *list* Currently connected users: "..userstr)
 end)

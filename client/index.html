@@ -169,15 +169,20 @@
 							break;
 						addLine("* <b>" + escapeHTML(msg_nick) + "</b> " + escapeHTML(msg_args) + "<br/>");
 						break;
+					case "info":
+						if (msg_args.replace(/ /g, "") == "")
+							break;
+						addLine('<font color="blue">' + escapeHTML("Information: " + msg_args) + "</font><br/>");
+						break;
+					case "warn":
+						if (msg_args.replace(/ /g, "") == "")
+							break;
+						addLine('<font color="yellow">' + escapeHTML("Warning: " + msg_args) + "</font><br/>");
+						break;
 					case "error":
 						if (msg_args.replace(/ /g, "") == "")
 							break;
 						addLine('<font color="red">' + escapeHTML("Error: " + msg_args) + "</font><br/>");
-						break;
-					case "info":
-						if (msg_args.replace(/ /g, "") == "")
-							break;
-						addLine('<font color="yellow">' + escapeHTML("Information: " + msg_args) + "</font><br/>");
 						break;
 					case "join":
 						addLine("<b>" + escapeHTML(msg_nick) + "</b> joined.<br/>");

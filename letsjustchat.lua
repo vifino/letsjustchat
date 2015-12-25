@@ -30,8 +30,9 @@ srv.GET("/ws", mw.ws(function()
 	local disallowed = {
 		["join"] = true,
 		["left"] = true,
-		["error"] = true,
 		["info"] = true,
+		["warn"] = true,
+		["error"] = true,
 	}
 
 	local clientid = context.ClientIP() -- Use simply the client IP + Port as the ID.
@@ -41,7 +42,7 @@ srv.GET("/ws", mw.ws(function()
 	if not connected_from_ip then
 		kvstore.set("concount:"..ip, 1)
 	elseif connected_from_ip == max_cons -1 then
-		ws.send(ws.TextMessage, "info * Connection limit reached. Any further connections will be disconnected. (Max Connections: "..tostring(max_cons)..")")
+		ws.send(ws.TextMessage, "warn * Connection limit reached. Any further connections will be disconnected. (Max Connections: "..tostring(max_cons)..")")
 		kvstore.inc("concount:"..ip, 1)
 	elseif connected_from_ip == max_cons then
 		ws.send(ws.TextMessage, "error * Too many active connections. (Max Connection count exceeded: "..tostring(max_cons)..")")
