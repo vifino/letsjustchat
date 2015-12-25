@@ -13,10 +13,10 @@ local loaded, loadtime = loader.load("init.d/*")
 logger.log("Main", logger.normal, "Loaded "..tostring(loaded).." Init Files. Took "..tostring(loadtime).."s.")
 
 -- Chat interface
-srv.GET("/", mw.new(function()
-	-- TODO: Replace stub
-	content("Go away. (For now.)")
-end))
+local f = io.open("client/index.html")
+local web_interface = f:read("*a")
+f:close()
+srv.GET("/", mw.echo(web_interface))
 
 -- Chat logic
 srv.GET("/ws", mw.ws(function()

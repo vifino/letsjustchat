@@ -4,7 +4,7 @@
 rpc.command("attention:bcast", function(chan, name, arg)
 	local clientid = (kvstore.get("users:"..chan) or {})[name]
 	-- TODO: Add whitelist settings thing.
-	local ip = clientid:gsub(":(%d+)", "")
+	local ip = clientid:gsub(":(%d+)$", "")
 	if admins[ip] then
 		arg:gsub("^(.-) (.+)$", function(target_chan, bcast_args)
 			local target_chan = target_chan
@@ -27,7 +27,7 @@ end, {
 rpc.command("attention:send", function(chan, name, arg)
 	local clientid = (kvstore.get("users:"..chan) or {})[name]
 	-- TODO: Add whitelist settings thing.
-	local ip = clientid:gsub(":(%d+)", "")
+	local ip = clientid:gsub(":(%d+)$", "")
 	if admins[ip] then
 		arg:gsub("^(.-) (.-) (.+)$", function(target_chan, user, send_args)
 			local target_chan = target_chan
@@ -49,7 +49,7 @@ end, {
 -- Lua eval.
 rpc.command("attention:lua", function(chan, name, arg)
 	local clientid = (kvstore.get("users:"..chan) or {})[name]
-	local ip = clientid:gsub(":(%d+)", "")
+	local ip = clientid:gsub(":(%d+)$", "")
 	if admins[ip] then
 		function print(...)
 			for k, v in pairs({...}) do
@@ -81,7 +81,7 @@ end, {
 -- Same as above, but print() and return outputs to the channel instead.
 rpc.command("attention:glua", function(chan, name, arg)
 	local clientid = (kvstore.get("users:"..chan) or {})[name]
-	local ip = clientid:gsub(":(%d+)", "")
+	local ip = clientid:gsub(":(%d+)$", "")
 	if admins[ip] then
 		function print(...)
 			for k, v in pairs({...}) do

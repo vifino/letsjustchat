@@ -1,0 +1,175 @@
+<html>
+	<head>
+		<title>Let's just chat!</title>
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=1"/>
+		<style type="text/css">
+			body {
+				margin: 0;
+				background: #000000;
+				background-size: cover;
+				background-repeat: no-repeat;
+				background-position: center center;
+				-webkit-background-size: cover; /* For WebKit*/
+				-moz-background-size: cover;    /* Mozilla*/
+				-o-background-size: cover;      /* Opera*/
+				background-size: cover;         /* Generic*/
+				width: 100%;
+				height: 100%;
+			}
+
+			#text {
+				width: 100%;
+				height: 100%;
+				color: #FEFEFE;
+				font-family: "Lucida Console", Monaco, monospace;
+				font-size: 13px;
+				text-shadow: 1px 1px 1px #000;
+				overflow: auto;
+			}
+
+			#content {
+				padding: 16px;
+				word-break: break-all;
+			}
+
+			#status {
+			}
+
+			#terminal {
+			}
+
+			#terminalinput {
+				background-color: rgba(0,0,0,0);
+				color: #FEFEFE;
+				font-family: "Lucida Console", Monaco, monospace;
+				font-size: 13px;
+				display: inline-block;
+				width: 100%;
+				border: none;
+				outline: none;
+				-webkit-box-sizing: border-box;
+				-moz-box-sizing: border-box;
+				box-sizing: border-box;
+			}
+
+			#terminalinput:focus {
+
+			}
+
+			#inputwrapper {
+				white-space: nowrap;
+			}
+		</style>
+		<script>
+			var content;
+			var messages = [];
+			var name = "";
+			var chan = "lobby";
+			function escapeHTML(str) {
+				var div = document.createElement('div');
+				div.appendChild(document.createTextNode(str));
+				return div.innerHTML;
+			};
+
+			// Term and connection logic
+			var addLine=function(message) {
+				messages.push(message);
+				var html = '';
+				for (var i=0; i < messages.length; i++) {
+					html += messages[i];
+				}
+				content.innerHTML = html;
+				content.parentElement.scrollTop = content.parentElement.scrollHeight;
+			}
+			var connection;
+
+			var connect = function() {
+				name = prompt("What do you want your name to be?", name).replace(/ /g, "_")
+				chan = prompt("Channel to join?", chan)
+				connection = new WebSocket('ws://' + window.location.host + '/ws?name=' + encodeURIComponent(name) + "&chan=" + encodeURIComponent(chan));
+				addLine("Connecting...<br/>");
+				connection.onopen = function() {
+					addLine("Connected to Let's just Chat!<br/><br/>");
+				};
+				connection.onerror = function(error) {
+					addLine("Error, check debug console<br/>");
+				};
+				connection.onclose = function(error) {
+					addLine("Disconnected<br/>");
+					setTimeout(connect, 5000);
+				};
+				connection.onmessage = function(message) {
+					handleOutput(message.data);
+				};
+			}
+			window.onload = function() {
+				document.getElementById("text").onClick = function(){
+					document.getElementById("terminalinput").focus();
+					return false;
+				}
+				document.getElementById("terminalinput").focus();
+				content = document.getElementById("terminal");
+				connect();
+			}
+
+			// Input handeling part
+			var handleInput = function(inp) {
+				var c = inp.substr(0, 1);
+				var h = inp.substr(1, 1);
+				if (c == '/' && h != "/") {
+					return "! " + inp.substr(1);
+				} else {
+					var str = inp;
+					if (h == "/") {
+						str = inp.substr(1);
+					}
+					addLine(escapeHTML("<" + name + "> " + str) + "<br/>");
+					return "msg " + str;
+				}
+			}
+
+			// Return value handeling part
+			var output_regex_match = /^([a-zA-Z0-9_]*?) (.*?) (.*) ?$/
+			var handleOutput = function(txt) {
+				var match = output_regex_match.exec(txt + " ")
+				var msg_type = match[1];
+				var msg_nick = match[2];
+				var msg_args = match[3];
+				switch (msg_type) {
+					case "msg":
+						addLine(escapeHTML("<" + msg_nick + "> " + msg_args) + "<br/>");
+						break;
+					case "action":
+						addLine(escapeHTML("* " + msg_nick + " " + msg_args) + "<br/>");
+						break;
+					case "error":
+						addLine('<font color="red">' + escapeHTML("Error: " + msg_args) + "</font><br/>");
+						break;
+					case "info":
+						addLine('<font color="yellow">' + escapeHTML("Information: " + msg_args) + "</font><br/>");
+						break;
+				}
+			}
+
+			var terminalinput = function(e) {
+				if (e.keyCode == 13) {
+					var inp = document.getElementById("terminalinput");
+					connection.send(handleInput(inp.value));
+					var objDiv = document.getElementById("text");
+					objDiv.scrollTop = objDiv.scrollHeight;
+					inp.value = "";
+					return false;
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<div id="text">
+			<div id="content">
+				<div id="terminal">Initializing...</div>
+				<div id="inputwrapper">&gt <input id="terminalinput" onkeypress="return terminalinput(event);" type="text"/></div>
+			</div>
+		</div>
+	</body>
+</html>
