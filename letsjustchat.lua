@@ -140,7 +140,7 @@ srv.GET("/ws", mw.ws(function()
 					end
 				elseif action == "!" then -- ! = ATTENTION!
 					(msg.." "):gsub("^(%w+) (.*)", function(rpc_cmd, arguments)
-						rpc.call("attention:"..rpc_cmd, channel, name, arguments)
+						rpc.call("attention:"..rpc_cmd, channel, name, arguments, db)
 					end)
 				else
 					pub(action, name, msg)
