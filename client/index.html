@@ -68,8 +68,6 @@
 		<script>
 			var content;
 			var messages = [];
-			var name = "";
-			var chan = "lobby";
 
 			// Helpers
 			function escapeHTML(str) {
@@ -89,6 +87,9 @@
 				return false;
 			}
 
+			var name = queryvar("name") || "";
+			var chan = "lobby";
+
 			// Term and connection logic
 			var addLine=function(message) {
 				messages.push(message);
@@ -103,7 +104,7 @@
 
 			var connect = function() {
 				name = prompt("What do you want your name to be?", name).replace(/ /g, "_")
-				chan = prompt("Channel to join?", chan)
+				chan = queryvar("chan") || prompt("Channel to join?", chan)
 				connection = new WebSocket('ws://' + window.location.host + '/ws?name=' + encodeURIComponent(name) + "&chan=" + encodeURIComponent(chan));
 				addLine("Connecting...<br/>");
 				connection.onopen = function() {
