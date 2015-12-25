@@ -40,14 +40,11 @@ srv.GET("/ws", mw.ws(function()
 	local connected_from_ip = tonumber(kvstore.get("concount:"..ip))
 	if not connected_from_ip then
 		kvstore.set("concount:"..ip, 1)
-	elseif connected_from_ip == 1 then
-		ws.send(ws.TextMessage, "info * Two connections already, starting to reach the limit of 3. After that is reached, all new clients will be forcibly disconnected.")
+	elseif connected_from_ip == max_cons -1 then
+		ws.send(ws.TextMessage, "info * Connection limit reached. Any further connections will be disconnected. (Max Connections: "..tostring(max_cons)..")")
 		kvstore.inc("concount:"..ip, 1)
-	elseif connected_from_ip == 2 then
-		ws.send(ws.TextMessage, "info * Three connections. Any further one will be forcibly terminated.")
-		kvstore.inc("concount:"..ip, 1)
-	elseif connected_from_ip == 3 then
-		ws.send(ws.TextMessage, "error * Too many active connections. (Connection count exceeded 3)")
+	elseif connected_from_ip == max_cons then
+		ws.send(ws.TextMessage, "error * Too many active connections. (Max Connection count exceeded: "..tostring(max_cons)..")")
 		return
 	else
 		kvstore.inc("concount:"..ip, 1)
@@ -66,7 +63,7 @@ srv.GET("/ws", mw.ws(function()
 		kvstore.dec("concount:"..ip, 1)
 		return
 	elseif #name > maxlen then -- Exceeds maximum name length
-		ws.send(ws.TextMessage, "error * Name exceeds max length.")
+		ws.send(ws.TextMessage, "error * Name exceeds max length. ("..tostring(maxlen)..")")
 		kvstore.dec("concount:"..ip, 1)
 		return
 	end
@@ -85,6 +82,9 @@ srv.GET("/ws", mw.ws(function()
 		rpc.call("log.normal", "Chat", "Looks like "..chan.." is getting some activity!")
 		event.handle("chan:"..chan, function(callee, action, name, clientid, msg)
 			usercount = usercount or 0
+
+			-- DB Structure:
+			-- name - clientid
 			db = db or {}
 
 			action = action:lower()
@@ -152,10 +152,20 @@ srv.GET("/ws", mw.ws(function()
 		kvstore.set("started:"..chan, true)
 	end
 
-	if (kvstore.get("users:"..chan) or {})[name] then
-		ws.send(ws.TextMessage, "error * User already existing.")
-		kvstore.dec("concount:"..ip, 1)
-		return
+	local other_user = (kvstore.get("users:"..chan) or {})[name]
+	if other_user then
+		if other_user:gsub(":(%d+)$", "") == ip then
+			-- Ghosting other user.
+			local wsok = kvstore.get("client:"..other_user)
+			wsok.WriteMessage(1, convert.stringtocharslice("error * You got ghosted!"))
+			wsok.Close()
+			ws.send(ws.TextMessage, "info * Ghosted connection with same name as current one.")
+			os.sleep(1) -- To further limit spam and stuff.
+		else
+			ws.send(ws.TextMessage, "error * User already existing.")
+			kvstore.dec("concount:"..ip, 1)
+			return
+		end
 	end
 
 	-- Fire new user event
@@ -201,4 +211,6 @@ srv.GET("/ws", mw.ws(function()
 	-- Finalize
 	kvstore.dec("concount:"..clientid:gsub(":(%d+)$", ""), 1)
 	event.fire("chan:"..chan, "client", "left", name, clientid)
-end))
+end, {
+	max_cons = settings.max_connections or 5,
+}))
