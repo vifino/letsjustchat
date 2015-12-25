@@ -30,12 +30,30 @@ srv.GET("/ws", mw.ws(function()
 		["error"] = true,
 		["info"] = true,
 	}
+
+	local clientid = context.ClientIP() -- Use simply the client IP + Port as the ID.
+	local ip = clientid:gsub(":(%d+)$", "")
+
+	local connected_from_ip = tonumber(kvstore.get("concount:"..ip))
+	if not connected_from_ip then
+		kvstore.set("concount:"..ip, 1)
+	elseif connected_from_ip == 1 then
+		ws.send(ws.TextMessage, "info * Two connections already, starting to reach the limit of 3. After that is reached, all new clients will be forcibly disconnected.")
+		kvstore.inc("concount:"..ip, 1)
+	elseif connected_from_ip == 2 then
+		ws.send(ws.TextMessage, "info * Three connections. Any further one will be forcibly terminated.")
+		kvstore.inc("concount:"..ip, 1)
+	elseif connected_from_ip == 3 then
+		ws.send(ws.TextMessage, "error * Too many active connections. (Connection count exceeded 3)")
+		return
+	else
+		kvstore.inc("concount:"..ip, 1)
+	end
+
 	-- Require libraries we use.
 	event = require("libs.event")
 	rpc = require("libs.multirpc")
 	server = server or require("libs.servercheck")
-
-	local clientid = context.ClientIP() -- Use simply the client IP + Port as the ID.
 
 	-- TODO: Actual chan logic.
 	local name = query("name")
@@ -129,7 +147,7 @@ srv.GET("/ws", mw.ws(function()
 	end
 
 	if (kvstore.get("users:"..chan) or {})[name] then
-		ws.send(ws.TextMessage, "User already existing.")
+		ws.send(ws.TextMessage, "error * User already existing.")
 		return
 	end
 
@@ -175,4 +193,5 @@ srv.GET("/ws", mw.ws(function()
 
 	-- Finalize
 	event.fire("chan:"..chan, "client", "left", name, clientid)
+	kvstore.dec("concount:"..ip, 1)
 end))
