@@ -149,6 +149,12 @@
 					case "info":
 						addLine('<font color="yellow">' + escapeHTML("Information: " + msg_args) + "</font><br/>");
 						break;
+					case "join":
+						addLine(escapeHTML(msg_nick + " joined.") + "<br/>");
+						break;
+					case "left":
+						addLine(escapeHTML(msg_nick + " left.") + "<br/>");
+						break;
 				}
 			}
 

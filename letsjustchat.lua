@@ -63,14 +63,17 @@ srv.GET("/ws", mw.ws(function()
 
 	if name == nil or name == "" then
 		ws.send(ws.TextMessage, "error * Please choose a name by connecting to the WebSocket with the query argument name set to your preferred name.")
+		kvstore.dec("concount:"..ip, 1)
 		return
 	elseif #name > maxlen then -- Exceeds maximum name length
 		ws.send(ws.TextMessage, "error * Name exceeds max length.")
+		kvstore.dec("concount:"..ip, 1)
 		return
 	end
 
 	if not server.user_valid(name) then
 		ws.send(ws.TextMessage, "error * Name contains invalid characters and/or is restricted.")
+		kvstore.dec("concount:"..ip, 1)
 		return
 	end
 
@@ -151,6 +154,7 @@ srv.GET("/ws", mw.ws(function()
 
 	if (kvstore.get("users:"..chan) or {})[name] then
 		ws.send(ws.TextMessage, "error * User already existing.")
+		kvstore.dec("concount:"..ip, 1)
 		return
 	end
 
@@ -195,6 +199,6 @@ srv.GET("/ws", mw.ws(function()
 	end
 
 	-- Finalize
+	kvstore.dec("concount:"..clientid:gsub(":(%d+)$", ""), 1)
 	event.fire("chan:"..chan, "client", "left", name, clientid)
-	kvstore.dec("concount:"..ip, 1)
 end))
