@@ -154,9 +154,6 @@
 			// Return value handeling part
 			var output_regex_match = /^([a-zA-Z0-9_]*?) (.*?) (.*) ?$/
 			var handleOutput = function(txt) {
-				var objDiv = document.getElementById("text");
-				objDiv.scrollTop = objDiv.scrollHeight;
-
 				var match = output_regex_match.exec(txt + " ")
 				var msg_type = match[1];
 				var msg_nick = match[2];
@@ -197,6 +194,9 @@
 						addLine("<b>" + escapeHTML(msg_nick) + "</b> left.<br/>");
 						break;
 				}
+
+				var objDiv = document.getElementById("text");
+				objDiv.scrollTop = objDiv.scrollHeight;
 			}
 
 			var terminalinput = function(e) {
