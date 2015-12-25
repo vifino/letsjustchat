@@ -18,6 +18,10 @@
 				height: 100%;
 			}
 
+			b {
+				font-weight: bold;
+			}
+
 			#text {
 				width: 100%;
 				height: 100%;
@@ -90,13 +94,13 @@
 				connection = new WebSocket('ws://' + window.location.host + '/ws?name=' + encodeURIComponent(name) + "&chan=" + encodeURIComponent(chan));
 				addLine("Connecting...<br/>");
 				connection.onopen = function() {
-					addLine("Connected to Let's just Chat!<br/><br/>");
+					addLine('<font color="green">Connected to Let\'s just Chat!</font><br/><br/>');
 				};
 				connection.onerror = function(error) {
-					addLine("Error, check debug console<br/>");
+					addLine('<font color="red">Error, check debug console.</font><br/>');
 				};
 				connection.onclose = function(error) {
-					addLine("Disconnected<br/>");
+					addLine('<font color="red">Disconnected!</font><br/>');
 					setTimeout(connect, 5000);
 				};
 				connection.onmessage = function(message) {
@@ -124,7 +128,7 @@
 					if (h == "/") {
 						str = inp.substr(1);
 					}
-					addLine(escapeHTML("<" + name + "> " + str) + "<br/>");
+					addLine("&lt;<b>" + escapeHTML(name) + "</b>&gt; " + escapeHTML(str) + "<br/>");
 					return "msg " + str;
 				}
 			}
@@ -138,10 +142,10 @@
 				var msg_args = match[3];
 				switch (msg_type) {
 					case "msg":
-						addLine(escapeHTML("<" + msg_nick + "> " + msg_args) + "<br/>");
+						addLine("&lt;<b>" + escapeHTML(msg_nick) + "</b>&gt; " + escapeHTML(msg_args) + "<br/>");
 						break;
 					case "action":
-						addLine(escapeHTML("* " + msg_nick + " " + msg_args) + "<br/>");
+						addLine("* <b>" + escapeHTML(msg_nick) + "</b> " + escapeHTML(msg_args) + "<br/>");
 						break;
 					case "error":
 						addLine('<font color="red">' + escapeHTML("Error: " + msg_args) + "</font><br/>");
@@ -150,10 +154,10 @@
 						addLine('<font color="yellow">' + escapeHTML("Information: " + msg_args) + "</font><br/>");
 						break;
 					case "join":
-						addLine(escapeHTML(msg_nick + " joined.") + "<br/>");
+						addLine("<b>" + escapeHTML(msg_nick) + "</b> joined.<br/>");
 						break;
 					case "left":
-						addLine(escapeHTML(msg_nick + " left.") + "<br/>");
+						addLine("<b>" + escapeHTML(msg_nick) + "</b> left.<br/>");
 						break;
 				}
 			}
