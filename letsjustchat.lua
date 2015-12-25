@@ -160,6 +160,7 @@ srv.GET("/ws", mw.ws(function()
 			local wsok = kvstore.get("client:"..other_user)
 			wsok.WriteMessage(1, convert.stringtocharslice("error * You got ghosted!"))
 			wsok.Close()
+			kvstore.del("client:"..other_user)
 			ws.send(ws.TextMessage, "info * Ghosted connection with same name as current one.")
 			os.sleep(1) -- To further limit spam and stuff.
 		else
@@ -210,6 +211,7 @@ srv.GET("/ws", mw.ws(function()
 	end
 
 	-- Finalize
+	kvstore.del("client:"..clientid)
 	kvstore.dec("concount:"..clientid:gsub(":(%d+)$", ""), 1)
 	event.fire("chan:"..chan, "client", "left", name, clientid)
 end, {
