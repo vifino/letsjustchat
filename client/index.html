@@ -176,7 +176,9 @@
 					case "info":
 						if (msg_args.replace(/ /g, "") == "")
 							break;
-						addLine('<font color="blue">' + escapeHTML("Information: " + msg_args) + "</font><br/>");
+						var text = escapeHTML("Information: " + msg_args);
+						if (text == "Ghosted connection with same name as current one.") name = "";
+						addLine('<font color="blue">' + text + "</font><br/>");
 						break;
 					case "warn":
 						if (msg_args.replace(/ /g, "") == "")
