@@ -12,7 +12,7 @@ return {
 		-- TODO: Allow some unicode or something.
 
 		-- Check based on pattern.
-		local is_invalid = not str:match("^([%w_-]+)$")
+		local is_invalid = not str:match("^([%w_-%^]+)$")
 
 		-- Check if it is the restricted *, just in case.
 		is_invalid = is_invalid or str == "*"

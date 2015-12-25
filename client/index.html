@@ -136,21 +136,33 @@
 			// Return value handeling part
 			var output_regex_match = /^([a-zA-Z0-9_]*?) (.*?) (.*) ?$/
 			var handleOutput = function(txt) {
+				var objDiv = document.getElementById("text");
+				objDiv.scrollTop = objDiv.scrollHeight;
+
 				var match = output_regex_match.exec(txt + " ")
 				var msg_type = match[1];
 				var msg_nick = match[2];
 				var msg_args = match[3];
+
 				switch (msg_type) {
 					case "msg":
+						if (msg_args.replace(/ /g, "") == "")
+							break;
 						addLine("&lt;<b>" + escapeHTML(msg_nick) + "</b>&gt; " + escapeHTML(msg_args) + "<br/>");
 						break;
 					case "action":
+						if (msg_args.replace(/ /g, "") == "")
+							break;
 						addLine("* <b>" + escapeHTML(msg_nick) + "</b> " + escapeHTML(msg_args) + "<br/>");
 						break;
 					case "error":
+						if (msg_args.replace(/ /g, "") == "")
+							break;
 						addLine('<font color="red">' + escapeHTML("Error: " + msg_args) + "</font><br/>");
 						break;
 					case "info":
+						if (msg_args.replace(/ /g, "") == "")
+							break;
 						addLine('<font color="yellow">' + escapeHTML("Information: " + msg_args) + "</font><br/>");
 						break;
 					case "join":
@@ -165,7 +177,10 @@
 			var terminalinput = function(e) {
 				if (e.keyCode == 13) {
 					var inp = document.getElementById("terminalinput");
-					connection.send(handleInput(inp.value));
+					if (inp.value.replace(/ /g, "") != "") {
+						connection.send(handleInput(inp.value.replace(/^ */, "")));
+					}
+
 					var objDiv = document.getElementById("text");
 					objDiv.scrollTop = objDiv.scrollHeight;
 					inp.value = "";

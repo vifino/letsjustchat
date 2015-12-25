@@ -195,7 +195,7 @@ srv.GET("/ws", mw.ws(function()
 				ws.send(ws.TextMessage, "error * Command exceeded maximum length of "..tostring(maxmsglen)..".")
 			end
 		end
-		os.sleep(0.5)
+		os.sleep(1)
 	end
 
 	-- Finalize
