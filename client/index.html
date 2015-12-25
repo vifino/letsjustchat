@@ -103,8 +103,8 @@
 			var connection;
 
 			var connect = function() {
-				name = prompt("What do you want your name to be?", name).replace(/ /g, "_")
-				chan = queryvar("chan") || prompt("Channel to join?", chan)
+				if (name == "") name = prompt("What do you want your name to be?", name).replace(/ /g, "_")
+				if (chan == "") chan = queryvar("chan") || prompt("Channel to join?", chan)
 				connection = new WebSocket('ws://' + window.location.host + '/ws?name=' + encodeURIComponent(name) + "&chan=" + encodeURIComponent(chan));
 				addLine("Connecting...<br/>");
 				connection.onopen = function() {
@@ -118,6 +118,10 @@
 					setTimeout(connect, 5000);
 				};
 				connection.onmessage = function(message) {
+					//Clear name and ask again
+					if (message == "error * Name contains invalid characters and/or is restricted.") name = "";
+					if (message.startsWith("error * Name exceeds max length. (")) name = "";
+					
 					handleOutput(message.data);
 				};
 			}
