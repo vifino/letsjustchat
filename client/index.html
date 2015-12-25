@@ -119,9 +119,9 @@
 				};
 				connection.onmessage = function(message) {
 					//Clear name and ask again
-					if (message == "error * Name contains invalid characters and/or is restricted.") name = "";
-					if (message.indexOf("error * Name exceeds max length. (") == 0) name = "";
-					
+					if (message.data == "error * Name contains invalid characters and/or is restricted.") name = "";
+					if (message.data.indexOf("error * Name exceeds max length. (") == 0) name = "";
+
 					handleOutput(message.data);
 				};
 			}
