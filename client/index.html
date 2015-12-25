@@ -176,18 +176,18 @@
 					case "info":
 						if (msg_args.replace(/ /g, "") == "")
 							break;
-						addLine('<font color="blue">' + escapeHTML("Information: " + msg_args) + "</font><br/>");
+						addLine('<font color="blue">' + escapeHTML("[Information] " + msg_args) + "</font><br/>");
 						break;
 					case "warn":
 						if (msg_args.replace(/ /g, "") == "")
 							break;
-						addLine('<font color="yellow">' + escapeHTML("Warning: " + msg_args) + "</font><br/>");
+						addLine('<font color="yellow">' + escapeHTML("[Warning] " + msg_args) + "</font><br/>");
 						break;
 					case "error":
 						if (msg_args.replace(/ /g, "") == "")
 							break;
-						var text = escapeHTML("Error: " + msg_args);
-						if (text.indexOf("You got ghosted!")>=0) name = "";
+						var text = escapeHTML("[Error] " + msg_args);
+						if (msg_args.indexOf("You got ghosted!")==0) name = "";
 						addLine('<font color="red">' + text + "</font><br/>");
 						break;
 					case "join":
