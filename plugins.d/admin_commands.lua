@@ -2,7 +2,7 @@
 
 -- Basically just msg, but with variable chan.
 rpc.command("attention:bcast", function(chan, name, arg)
-	local clientid = (kvstore.get("users:"..chan) or {})[name]
+	local clientid = (kvstore.get("users:"..chan) or {})[name:lower()]
 	-- TODO: Add whitelist settings thing.
 	local ip = clientid:gsub(":(%d+)$", "")
 	if admins[ip] then
@@ -25,7 +25,7 @@ end, {
 
 -- Pretty much bcast with just one person receiving it.
 rpc.command("attention:send", function(chan, name, arg)
-	local clientid = (kvstore.get("users:"..chan) or {})[name]
+	local clientid = (kvstore.get("users:"..chan) or {})[name:lower()]
 	-- TODO: Add whitelist settings thing.
 	local ip = clientid:gsub(":(%d+)$", "")
 	if admins[ip] then
@@ -48,7 +48,7 @@ end, {
 
 -- Lua eval.
 rpc.command("attention:lua", function(chan, name, arg)
-	local clientid = (kvstore.get("users:"..chan) or {})[name]
+	local clientid = (kvstore.get("users:"..chan) or {})[name:lower()]
 	local ip = clientid:gsub(":(%d+)$", "")
 	if admins[ip] then
 		function print(...)

@@ -92,7 +92,7 @@ srv.GET("/ws", mw.ws(function()
 
 			local function pub(a, nme, m)
 				for user, userid in pairs(db) do
-					if user ~= name then
+					if user ~= nme:lower() then
 						local wsok = kvstore.get("client:"..userid)
 						if wsok then
 							wsok.WriteMessage(1, convert.stringtocharslice(a..(nme and (" " .. nme) or "")..(m and (" " .. m) or ""))) -- Dark magic
@@ -122,13 +122,13 @@ srv.GET("/ws", mw.ws(function()
 				end
 			else
 				if action == "join" then
-					db[name] = clientid
+					db[name:lower()] = clientid
 					usercount = usercount + 1
 					kvstore.set("users:"..channel, db)
 					pub("join", name)
 					event.fire("user:join", channel, name, db)
 				elseif action == "left" then
-					db[name] = nil
+					db[name:lower()] = nil
 					usercount = usercount - 1
 					kvstore.set("users:"..channel, db)
 					event.fire("user:left", channel, name, db)
@@ -141,8 +141,7 @@ srv.GET("/ws", mw.ws(function()
 					end
 				elseif action == "!" then -- ! = ATTENTION!
 					(msg.." "):gsub("^(%w+) (.*)", function(rpc_cmd, arguments)
-						print("Attention: "..rpc_cmd, channel, name, arguments, db)
-						rpc.call("attention:"..rpc_cmd, channel, name, arguments, db)
+						rpc.call("attention:"..rpc_cmd:lower(), channel, name, arguments, db)
 					end)
 				else
 					pub(action, name, msg)
@@ -154,8 +153,9 @@ srv.GET("/ws", mw.ws(function()
 		kvstore.set("started:"..chan, true)
 	end
 
-	local other_user = (kvstore.get("users:"..chan) or {})[name]
-	if other_user then
+	local other_user_alias = kvstore.get("alias:"..name:lower())
+	if other_user_alias then
+		local other_user = (kvstore.get("users:"..chan) or {})[name:lower()]
 		if other_user:gsub(":(%d+)$", "") == ip then
 			-- Ghosting other user.
 			local wsok = kvstore.get("client:"..other_user)
@@ -173,6 +173,7 @@ srv.GET("/ws", mw.ws(function()
 
 	-- Fire new user event
 	kvstore.set("client:"..clientid, ws.con)
+	kvstore.set("alias:"..name:lower(), name)
 	event.fire("chan:"..chan, "client", "join", name, clientid)
 
 	local matchfunc = function(cmd, args)
@@ -213,6 +214,7 @@ srv.GET("/ws", mw.ws(function()
 
 	-- Finalize
 	kvstore.del("client:"..clientid)
+	kvstore.del("alias:"..name:lower())
 	kvstore.dec("concount:"..clientid:gsub(":(%d+)$", ""), 1)
 	event.fire("chan:"..chan, "client", "left", name, clientid)
 end, {
