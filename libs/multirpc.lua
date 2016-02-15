@@ -2,10 +2,10 @@
 
 local _M = {}
 
-local msgpack = require("msgpack")
-local pubsub = require("libs.pubsub")
+msgpack = require("msgpack")
+pubsub = require("libs.pubsub")
 
-function _M.command(name, func, bindings)
+function _M.command(name, func, bindings, buffer)
 	local binds = {
 		f = string.dump(func),
 		event_name = name
@@ -20,7 +20,7 @@ function _M.command(name, func, bindings)
 		event = require("libs.event")
 		prettify = require("prettify")
 		function print(...)
-			logger.log(event_name, logger.normal, prettify(...))
+			rpc.call("log.normal", event_name, prettify(...))
 		end
 		local func = loadstring(f)
 		f = nil
@@ -34,10 +34,10 @@ function _M.command(name, func, bindings)
 			end
 			local suc, err = pcall(func, unpack(args))
 			if not suc then
-				logger.log(state_name, logger.critical, err)
+				rpc.call("log.critical", state_name, err)
 			end
 		end
-	end, binds)
+	end, binds, buffer)
 end
 
 function _M.call(name, ...)
